@@ -1,9 +1,3 @@
-Here is the complete updated `app.py` code. It fixes both styling issues:
-
-1. **Suggested Searches Fixed:** Scoped the pill styles specifically to the chips row so they render as wide, readable Material 3 pills ("Living Room Furniture", "Sunset Photos (2024)", "Receipts & Documents") rather than squished grey circles.
-2. **Action Overlay Fixed:** Grouped the "Similar" and "Hide" action icons **side-by-side in the bottom-right corner** of each photo card, hidden by default and visible **only on hover**.
-
-```python
 import streamlit as st
 import time
 import os
@@ -508,5 +502,3 @@ else:
                             st.session_state.neg_indices.add(img_idx)
                             st.session_state.pos_indices.discard(img_idx)
                         st.rerun()
-
-```
