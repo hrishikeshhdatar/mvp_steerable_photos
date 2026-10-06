@@ -17,23 +17,19 @@ st.set_page_config(
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
-    /* Google Fonts Import */
-    @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&display=swap');
 
-    /* Global Typography & Canvas Reset */
     html, body, [class*="stApp"], .stApp {
         background-color: #FFFFFF !important;
         color: #202124 !important;
-        font-family: 'Google Sans Text', 'Google Sans', Roboto, Arial, sans-serif !important;
+        font-family: 'Google Sans Text', 'Google Sans', Roboto, sans-serif !important;
         -webkit-font-smoothing: antialiased;
     }
 
-    /* Hide Default Streamlit Header, Footer, and Sidebar */
     header[data-testid="stHeader"], footer, section[data-testid="stSidebar"] {
         display: none !important;
     }
 
-    /* Max Content Width (1200px centered, 24px side padding) */
     .main .block-container {
         max-width: 1200px !important;
         padding-left: 24px !important;
@@ -43,26 +39,21 @@ st.markdown("""
         margin: 0 auto !important;
     }
 
-    /* 1. Google Photos Header (64px tall, left-aligned) */
+    /* 1. Google Photos Header */
     .gp-header {
         height: 64px;
         display: flex;
         align-items: center;
         background-color: #FFFFFF;
         border-bottom: 1px solid #F1F3F4;
-        margin-bottom: 0px;
     }
     .gp-wordmark {
         font-family: 'Google Sans', Roboto, sans-serif;
         font-size: 22px;
         font-weight: 500;
-        line-height: 28px;
         letter-spacing: 0px !important;
         display: flex;
         align-items: center;
-    }
-    .gp-wordmark span {
-        letter-spacing: 0px !important;
     }
     .gp-photos-text {
         color: #5F6368;
@@ -71,7 +62,7 @@ st.markdown("""
         margin-left: 6px;
     }
 
-    /* 2. Page Title (32px / 40px line-height, weight 400, 24px margins) */
+    /* 2. Page Title */
     .gp-page-title {
         font-family: 'Google Sans', Roboto, sans-serif;
         font-size: 32px;
@@ -82,10 +73,7 @@ st.markdown("""
         margin-bottom: 24px;
     }
 
-    /* 3. Search Bar (56px tall, 28px radius, no border, elevation shadow on focus) */
-    div[data-testid="stTextInput"] {
-        margin-bottom: 0px !important;
-    }
+    /* 3. Search Bar */
     div[data-testid="stTextInput"] > label {
         display: none !important;
     }
@@ -106,18 +94,16 @@ st.markdown("""
     div[data-testid="stTextInput"] > div > div:focus-within {
         background-color: #FFFFFF !important;
         box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3) !important;
-        border: none !important;
     }
     div[data-testid="stTextInput"] input {
-        font-family: 'Google Sans Text', 'Google Sans', Roboto, sans-serif !important;
+        font-family: 'Google Sans Text', Roboto, sans-serif !important;
         font-size: 16px !important;
-        font-weight: 400 !important;
         color: #202124 !important;
         height: 56px !important;
         background: transparent !important;
     }
 
-    /* 4. Suggested Searches Chips (16px below search bar, content-sized, wrapping) */
+    /* 4. Suggested Searches Chips */
     .suggested-section {
         margin-top: 16px;
     }
@@ -129,59 +115,49 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
-    /* Target Streamlit columns row for chips to wrap & fit content */
-    div[data-testid="stHorizontalBlock"]:has(.suggested-chip) {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) {
         display: flex !important;
+        flex-direction: row !important;
         flex-wrap: wrap !important;
         gap: 8px !important;
         width: 100% !important;
+        margin-bottom: 16px !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(.suggested-chip) > div[data-testid="stColumn"] {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) > div[data-testid="stColumn"] {
         width: auto !important;
-        min-width: unset !important;
+        min-width: 0 !important;
         flex: 0 0 auto !important;
+        padding: 0 !important;
     }
-
-    .suggested-chip button {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button {
         height: 32px !important;
         min-height: 32px !important;
         border-radius: 16px !important;
         border: 1px solid #DADCE0 !important;
         background-color: #FFFFFF !important;
         color: #202124 !important;
-        font-family: 'Google Sans Text', 'Google Sans', Roboto, sans-serif !important;
         font-size: 14px !important;
-        line-height: 20px !important;
         font-weight: 500 !important;
-        padding: 0 12px !important;
+        padding: 0 16px !important;
         box-shadow: none !important;
-        transition: background-color 150ms ease, border-color 150ms ease !important;
+        white-space: nowrap !important;
+        transition: background-color 150ms ease !important;
     }
-    .suggested-chip button:hover {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button:hover {
         background-color: #F1F3F4 !important;
         border-color: #DADCE0 !important;
-        color: #202124 !important;
-    }
-    .suggested-chip button span[data-testid="stIconMaterial"] {
-        font-size: 18px !important;
-        color: #5F6368 !important;
     }
 
-    /* 5. Result Info Header (32px below chips, secondary text) */
+    /* 5. Result Info Header */
     .result-info-header {
         margin-top: 32px;
         margin-bottom: 16px;
         font-size: 12px;
         line-height: 16px;
-        font-weight: 400;
         color: #5F6368;
         display: flex;
         align-items: center;
         justify-content: space-between;
-    }
-    .result-info-header .latency {
-        color: #70757A;
-        font-weight: 300;
     }
     .badge-chip {
         background-color: #E8F0FE;
@@ -190,187 +166,83 @@ st.markdown("""
         font-weight: 500;
         padding: 4px 12px;
         border-radius: 16px;
-        display: inline-block;
     }
 
-    /* 6. Photo Grid & Cards Layout */
-    div[data-testid="stHorizontalBlock"].photo-row {
-        gap: 8px !important;
-        margin-bottom: 8px !important;
-    }
-
-    /* Photo Card Container */
+    /* 6. Photo Grid & Action Overlays */
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) {
         position: relative !important;
         border-radius: 8px !important;
         overflow: hidden !important;
-        background-color: #E8EAED !important; /* Skeleton placeholder */
-        transition: transform 150ms ease !important;
-        margin-bottom: 0px !important;
+        background-color: #E8EAED !important;
+        margin-bottom: 8px !important;
     }
-
-    /* Responsive Grid Adjustments */
-    @media (max-width: 1023px) and (min-width: 600px) {
-        div[data-testid="stHorizontalBlock"].photo-row {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 8px !important;
-        }
-    }
-    @media (max-width: 599px) {
-        div[data-testid="stHorizontalBlock"].photo-row {
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
-        }
-    }
-
-    /* Photo Image */
-    div[data-testid="stColumn"] div[data-testid="stImage"] {
-        margin-bottom: 0px !important;
-        line-height: 0 !important;
-    }
-    div[data-testid="stColumn"] div[data-testid="stImage"] img {
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] img {
         border-radius: 8px !important;
         width: 100% !important;
         aspect-ratio: 4 / 3 !important;
         object-fit: cover !important;
-        display: block !important;
         transition: filter 150ms ease !important;
     }
-
-    /* Dim overlay on hover (rgba(0,0,0,0.08)) */
-    div[data-testid="stColumn"]:hover div[data-testid="stImage"] img {
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stImage"] img {
         filter: brightness(0.92) !important;
     }
 
-    /* Keyboard focus state (2px #1A73E8 outline with 2px offset) */
-    div[data-testid="stColumn"]:focus-within {
-        outline: 2px solid #1A73E8 !important;
-        outline-offset: 2px !important;
-    }
-
-    /* Overlaid Action Buttons (Bottom-right, 36px circular icons) */
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
         position: absolute !important;
         bottom: 12px !important;
         right: 12px !important;
-        width: auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
         z-index: 10 !important;
-        opacity: 0;
-        transition: opacity 150ms ease !important;
-        pointer-events: none;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 150ms ease-in-out !important;
     }
-
-    /* Show action buttons on hover / focus / touch */
-    div[data-testid="stColumn"]:hover > div:nth-child(2),
-    div[data-testid="stColumn"]:focus-within > div:nth-child(2) {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) > div[data-testid="stColumn"] {
+        width: auto !important;
+        flex: 0 0 auto !important;
+        padding: 0 !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        background-color: rgba(32, 33, 36, 0.6) !important;
+        border: none !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+        backdrop-filter: blur(4px) !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button[kind="primary"] {
+        background-color: #1A73E8 !important;
+    }
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
         opacity: 1 !important;
         pointer-events: auto !important;
     }
 
-    @media (hover: none) {
-        div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
+    /* Executive Telemetry Card */
+    .telemetry-card {
+        background-color: #F8F9FA;
+        border: 1px solid #E8EAED;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 32px;
+        font-size: 13px;
+        color: #3C4043;
     }
-
-    /* Nested action buttons container */
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        gap: 8px !important;
-        width: auto !important;
-    }
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) div[data-testid="stColumn"] {
-        width: auto !important;
-        min-width: unset !important;
-        background: transparent !important;
-        margin-bottom: 0px !important;
-    }
-
-    /* 36px Circular Icon Buttons */
-    div[data-testid="stColumn"] div[data-testid="stButton"] button {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        max-width: 36px !important;
-        max-height: 36px !important;
-        border-radius: 50% !important;
-        padding: 0 !important;
-        background-color: rgba(32, 33, 36, 0.6) !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
-        transition: background-color 150ms ease, transform 150ms ease !important;
-        backdrop-filter: blur(4px) !important;
-    }
-    div[data-testid="stColumn"] div[data-testid="stButton"] button:hover {
-        background-color: rgba(32, 33, 36, 0.85) !important;
-        transform: scale(1.05) !important;
-    }
-    div[data-testid="stColumn"] div[data-testid="stButton"] button:focus-visible {
-        outline: 2px solid #1A73E8 !important;
-        outline-offset: 2px !important;
-    }
-
-    /* Active / Liked State (Accent Blue) */
-    div[data-testid="stColumn"] div[data-testid="stButton"] button[kind="primary"] {
-        background-color: #1A73E8 !important;
-        color: #FFFFFF !important;
-    }
-    div[data-testid="stColumn"] div[data-testid="stButton"] button span[data-testid="stIconMaterial"] {
-        font-size: 20px !important;
-        color: #FFFFFF !important;
-    }
-
-    /* Skeleton Placeholder State */
-    @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-    }
-    .skeleton-box {
-        background: linear-gradient(90deg, #E8EAED 25%, #F1F3F4 50%, #E8EAED 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 8px;
-        aspect-ratio: 4 / 3;
-        width: 100%;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 48px 16px;
-        color: #202124;
-    }
-    .empty-state-icon {
-        font-size: 48px;
-        color: #5F6368;
-        margin-bottom: 12px;
-    }
-    .empty-state-title {
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 24px;
-        color: #202124;
-        margin-bottom: 4px;
-    }
-    .empty-state-hint {
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 20px;
-        color: #5F6368;
+    .metric-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1A73E8;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# System Initialization (Caching preserved)
+# System Initialization
 # -----------------------------------------------------------------------------
 @st.cache_resource
 def init_system():
@@ -382,7 +254,6 @@ def init_system():
 
 engine, parser, logger = init_system()
 
-# State variables preserved exactly as before
 if "query_input" not in st.session_state:
     st.session_state.query_input = "living room furniture"
 if "pos_indices" not in st.session_state:
@@ -390,13 +261,12 @@ if "pos_indices" not in st.session_state:
 if "neg_indices" not in st.session_state:
     st.session_state.neg_indices = set()
 
-# Fixed optimal vector weights preserved
 ALPHA = 0.5
 BETA = 0.4
 GAMMA = 0.2
 
 # -----------------------------------------------------------------------------
-# 1. Header (64px tall, Google wordmark with Photos text)
+# Header & Search
 # -----------------------------------------------------------------------------
 st.markdown("""
 <header class="gp-header">
@@ -404,61 +274,33 @@ st.markdown("""
         <span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC04;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span><span class="gp-photos-text">Photos</span>
     </div>
 </header>
+<div class="gp-page-title">Makes search feel like magic</div>
 """, unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# 2. Page Title
-# -----------------------------------------------------------------------------
-st.markdown('<div class="gp-page-title">Makes search feel like magic</div>', unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# 3. Search Bar
-# -----------------------------------------------------------------------------
-query_text = st.text_input(
-    "Search",
-    value=st.session_state.query_input,
-    placeholder="Ask Photos...",
-    key="search_bar_input"
-)
+query_text = st.text_input("Search", value=st.session_state.query_input, placeholder="Ask Photos...", key="search_bar_input")
 
 parsed_chips = parser.parse_query(query_text)
 parsed_year = parsed_chips.get("year")
 
-# -----------------------------------------------------------------------------
-# 4. Suggested Searches Chips
-# -----------------------------------------------------------------------------
+# Chips
 st.markdown('<div class="suggested-section"><div class="suggested-label">Suggested searches</div></div>', unsafe_allow_html=True)
-
 chip_cols = st.columns(3)
-
 with chip_cols[0]:
-    st.markdown('<div class="suggested-chip">', unsafe_allow_html=True)
     if st.button("Living Room Furniture", icon=":material/chair:", key="chip_living_room"):
         st.session_state.query_input = "living room furniture"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
 with chip_cols[1]:
-    st.markdown('<div class="suggested-chip">', unsafe_allow_html=True)
     if st.button("Sunset Photos (2024)", icon=":material/wb_twilight:", key="chip_sunset"):
         st.session_state.query_input = "scenic landscape sunset 2024"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
 with chip_cols[2]:
-    st.markdown('<div class="suggested-chip">', unsafe_allow_html=True)
     if st.button("Receipts & Documents", icon=":material/receipt_long:", key="chip_receipts"):
         st.session_state.query_input = "paper document receipt"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# Search Execution
-# -----------------------------------------------------------------------------
+# Execute Engine Search
 start_time = time.time()
-total_indexed = max(len(engine.image_paths), 50)
-
-results = engine.search(
+results, telemetry = engine.search(
     query_text=query_text,
     pos_indices=list(st.session_state.pos_indices),
     neg_indices=list(st.session_state.neg_indices),
@@ -466,38 +308,25 @@ results = engine.search(
     alpha=ALPHA,
     beta=BETA,
     gamma=GAMMA,
-    top_k=total_indexed
+    top_k=50
 )
 latency_ms = round((time.time() - start_time) * 1000, 2)
 
-# -----------------------------------------------------------------------------
-# 5. Result Info
-# -----------------------------------------------------------------------------
+# Result Info Header
 st.markdown(f"""
 <div class="result-info-header">
-    <div>Found {len(results)} photos <span class="latency">· {latency_ms} ms</span></div>
+    <div>Found {len(results)} photos <span style="color:#70757A; font-weight:300;">· {latency_ms} ms</span></div>
     {f'<span class="badge-chip">📅 Filter: {parsed_year}</span>' if parsed_year else ''}
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# 6. Photo Grid & Hover Actions
-# -----------------------------------------------------------------------------
+# Grid
 if not results:
-    st.markdown("""
-    <div class="empty-state">
-        <div class="material-symbols-outlined empty-state-icon">search_off</div>
-        <div class="empty-state-title">No photos found</div>
-        <div class="empty-state-hint">Try adjusting your search terms or clearing your filters</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.info("No matching photos found.")
 else:
-    # Render photos in 3-column rows
     for row_idx in range(0, len(results), 3):
         row_items = results[row_idx:row_idx+3]
         cols = st.columns(3)
-        st.markdown('<div class="photo-row-marker"></div>', unsafe_allow_html=True)
-        
         for idx, item in enumerate(row_items):
             col = cols[idx]
             img_idx = item["index"]
@@ -508,38 +337,40 @@ else:
             with col:
                 if os.path.exists(img_path):
                     st.image(img_path, use_container_width=True)
-                else:
-                    st.markdown('<div class="skeleton-box"></div>', unsafe_allow_html=True)
 
-                # Overlaid 36px action icon buttons
                 b1, b2 = st.columns(2)
-                
                 with b1:
-                    if st.button(
-                        "",
-                        icon=":material/thumb_up:",
-                        key=f"pos_{img_idx}",
-                        help="Show similar",
-                        type="primary" if is_pos else "secondary"
-                    ):
+                    if st.button("", icon=":material/thumb_up:", key=f"pos_{img_idx}", help="Show similar", type="primary" if is_pos else "secondary"):
                         if is_pos:
                             st.session_state.pos_indices.remove(img_idx)
                         else:
                             st.session_state.pos_indices.add(img_idx)
                             st.session_state.neg_indices.discard(img_idx)
                         st.rerun()
-
                 with b2:
-                    if st.button(
-                        "",
-                        icon=":material/visibility_off:",
-                        key=f"neg_{img_idx}",
-                        help="Hide photo",
-                        type="primary" if is_neg else "secondary"
-                    ):
+                    if st.button("", icon=":material/visibility_off:", key=f"neg_{img_idx}", help="Hide photo", type="primary" if is_neg else "secondary"):
                         if is_neg:
                             st.session_state.neg_indices.remove(img_idx)
                         else:
                             st.session_state.neg_indices.add(img_idx)
                             st.session_state.pos_indices.discard(img_idx)
                         st.rerun()
+
+# -----------------------------------------------------------------------------
+# Executive PM & Engineering Telemetry Drawer
+# -----------------------------------------------------------------------------
+with st.expander("🔬 Executive PM & Vector Engine Telemetry"):
+    st.markdown("#### Real-time Multimodal Vector Performance")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Embedding Model", f"SigLIP {telemetry.get('dimension', 1152)}-D")
+    m2.metric("Mean Reciprocal Rank (MRR)", telemetry.get("mrr", 0.0))
+    m3.metric("Precision@3 Boost", f"{telemetry.get('precision_at_3', 0.0)}%")
+    m4.metric("Vector Cosine Drift", f"{telemetry.get('angular_drift_deg', 0.0)}°")
+
+    st.markdown(f"""
+    <div class="telemetry-card">
+        <b>Engine Guardrails:</b> Hyper-sphere Unit Bounded (Norm = 1.00) | 
+        <b>Active Feedback Exemplars:</b> +{len(st.session_state.pos_indices)} Positives, -{len(st.session_state.neg_indices)} Negatives | 
+        <b>Latency Budget:</b> {latency_ms}ms / 150ms Target
+    </div>
+    """, unsafe_allow_html=True)
