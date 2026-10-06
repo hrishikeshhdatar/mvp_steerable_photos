@@ -52,14 +52,14 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* "Ask Photos..." Search Bar with Magnifying Glass */
+    /* "Ask Photos..." Search Bar with Embedded Magnifying Glass */
     div[data-testid="stTextInput"] > div > div {
         background-color: #FFFFFF !important;
         border-radius: 100px !important;
         border: 1px solid #C4C7C5 !important;
         box-shadow: 0 4px 18px rgba(0,0,0,0.05) !important;
         padding: 6px 16px 6px 48px !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2002124' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23202124' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") !important;
         background-repeat: no-repeat !important;
         background-position: 18px center !important;
         transition: all 0.2s ease-in-out !important;
@@ -81,7 +81,7 @@ st.markdown("""
         display: none !important;
     }
 
-    /* Suggested Searches Chips Section */
+    /* Suggested Searches Section */
     .suggested-label {
         font-size: 14px;
         color: #444746;
@@ -189,6 +189,10 @@ st.markdown("---")
 # Photos Results Stream
 # -----------------------------------------------------------------------------
 start_time = time.time()
+
+# Set top_k dynamically to match total indexed images so all 24+ photos display
+total_indexed = max(len(engine.image_paths), 50)
+
 results = engine.search(
     query_text=query_text,
     pos_indices=list(st.session_state.pos_indices),
@@ -197,7 +201,7 @@ results = engine.search(
     alpha=ALPHA,
     beta=BETA,
     gamma=GAMMA,
-    top_k=12
+    top_k=total_indexed
 )
 latency_ms = round((time.time() - start_time) * 1000, 2)
 
