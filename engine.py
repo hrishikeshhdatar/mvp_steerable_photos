@@ -18,6 +18,20 @@ class SteeringVectorEngine:
         self.image_embeddings = None
         self.metadata = []
 
+    def _unwrap_tensor(self, output):
+        """Safely extracts a PyTorch Tensor from model outputs across transformer versions."""
+        if isinstance(output, torch.Tensor):
+            return output
+        if hasattr(output, "text_embeds") and output.text_embeds is not None:
+            return output.text_embeds
+        if hasattr(output, "image_embeds") and output.image_embeds is not None:
+            return output.image_embeds
+        if hasattr(output, "pooler_output") and output.pooler_output is not None:
+            return output.pooler_output
+        if isinstance(output, (list, tuple)) and len(output) > 0:
+            return output[0]
+        return output
+
     def load_or_build_index(self, image_folder="data/images"):
         """Precomputes or loads 1152-D SigLIP embeddings for target dataset."""
         os.makedirs(self.data_dir, exist_ok=True)
@@ -41,6 +55,8 @@ class SteeringVectorEngine:
 
         self.image_paths = current_paths
         if not self.image_paths:
+            self.image_embeddings = None
+            self.metadata = []
             return
 
         embeddings_list = []
@@ -51,10 +67,7 @@ class SteeringVectorEngine:
                 inputs = self.processor(images=img, return_tensors="pt").to(self.device)
                 with torch.no_grad():
                     img_emb = self.model.get_image_features(**inputs)
-                    if hasattr(img_emb, "image_embeds"):
-                        img_emb = img_emb.image_embeds
-                    elif hasattr(img_emb, "pooler_output"):
-                        img_emb = img_emb.pooler_output
+                    img_emb = self._unwrap_tensor(img_emb)
                     img_emb = F.normalize(img_emb, p=2, dim=-1)
                 
                 embeddings_list.append(img_emb)
@@ -90,44 +103,65 @@ class SteeringVectorEngine:
         2. Hyper-sphere unit normalization bounds
         3. Real-time quantitative evaluation telemetry (MRR, P@3, Cosine Drift)
         """
-        if self.image_embeddings is None or len(self.image_paths) == 0:
-            return [], {}
+        empty_telemetry = {
+            "cosine_similarity": 1.0,
+            "angular_drift_deg": 0.0,
+            "mrr": 0.0,
+            "precision_at_3": 0.0,
+            "dimension": 1152,
+            "total_indexed": 0,
+            "is_bounded": True
+        }
 
-        # 1. Encode Natural Language Text Query
-        inputs = self.processor(text=[query_text], return_tensors="pt", padding=True).to(self.device)
+        if self.image_embeddings is None or len(self.image_paths) == 0:
+            return [], empty_telemetry
+
+        # Ensure tensor sits on correct active device
+        self.image_embeddings = self.image_embeddings.to(self.device)
+        total_photos = len(self.image_paths)
+
+        # Sanitize query text to prevent empty string tokenizer crashes
+        clean_query = str(query_text).strip() if query_text else "photo"
+        if not clean_query:
+            clean_query = "photo"
+
+        # Bounds validation on exemplar indices
+        valid_pos = [i for i in pos_indices if isinstance(i, int) and 0 <= i < total_photos]
+        valid_neg = [i for i in neg_indices if isinstance(i, int) and 0 <= i < total_photos]
+
+        # 1. Encode Text Query (no padding=True to prevent tokenizer ValueError)
+        inputs = self.processor(text=[clean_query], return_tensors="pt").to(self.device)
         with torch.no_grad():
             text_emb = self.model.get_text_features(**inputs)
-            if hasattr(text_emb, "text_embeds"):
-                text_emb = text_emb.text_embeds
-            elif hasattr(text_emb, "pooler_output"):
-                text_emb = text_emb.pooler_output
+            text_emb = self._unwrap_tensor(text_emb)
             v_query = F.normalize(text_emb, p=2, dim=-1)
 
         # 2. Vector Shift Arithmetic with Damping Guardrails
         v_steered = alpha * v_query
 
         # Positives accumulation with square-root weight damping
-        if pos_indices:
-            pos_embs = self.image_embeddings[pos_indices]
+        if valid_pos:
+            pos_embs = self.image_embeddings[valid_pos]
             e_pos_mean = torch.mean(pos_embs, dim=0, keepdim=True)
             e_pos_mean = F.normalize(e_pos_mean, p=2, dim=-1)
-            beta_eff = beta / (1.0 + 0.3 * (len(pos_indices) - 1))
-            v_steered += beta_eff * e_pos_mean
+            beta_eff = beta / (1.0 + 0.3 * (len(valid_pos) - 1))
+            v_steered = v_steered + beta_eff * e_pos_mean
 
         # Negatives accumulation with square-root weight damping
-        if neg_indices:
-            neg_embs = self.image_embeddings[neg_indices]
+        if valid_neg:
+            neg_embs = self.image_embeddings[valid_neg]
             e_neg_mean = torch.mean(neg_embs, dim=0, keepdim=True)
             e_neg_mean = F.normalize(e_neg_mean, p=2, dim=-1)
-            gamma_eff = gamma / (1.0 + 0.3 * (len(neg_indices) - 1))
-            v_steered -= gamma_eff * e_neg_mean
+            gamma_eff = gamma / (1.0 + 0.3 * (len(valid_neg) - 1))
+            v_steered = v_steered - gamma_eff * e_neg_mean
 
         # Hyper-sphere Unit Normalization Guardrail
         v_steered = F.normalize(v_steered, p=2, dim=-1)
 
         # Compute cosine shift telemetry
         cosine_sim = F.cosine_similarity(v_query, v_steered, dim=-1).item()
-        angular_drift = round((1.0 - cosine_sim) * 90.0, 2)
+        bounded_cos = max(-1.0, min(1.0, cosine_sim))
+        angular_drift = round((1.0 - bounded_cos) * 90.0, 2)
 
         # 3. Compute Vector Cosine Similarities across Index
         scores = torch.matmul(self.image_embeddings, v_steered.T).squeeze(-1)
@@ -153,11 +187,11 @@ class SteeringVectorEngine:
         # 5. Compute Quantitative Benchmark Telemetry (MRR & P@3)
         mrr = 0.0
         precision_at_3 = 0.0
-        if pos_indices:
-            p_hits = sum(1 for r in results[:3] if r["index"] in pos_indices)
-            precision_at_3 = round((p_hits / min(3, len(pos_indices))) * 100, 1)
+        if valid_pos:
+            p_hits = sum(1 for r in results[:3] if r["index"] in valid_pos)
+            precision_at_3 = round((p_hits / min(3, len(valid_pos))) * 100, 1)
 
-            first_pos_rank = next((r["rank"] for r in results if r["index"] in pos_indices), None)
+            first_pos_rank = next((r["rank"] for r in results if r["index"] in valid_pos), None)
             if first_pos_rank:
                 mrr = round(1.0 / first_pos_rank, 3)
 
@@ -166,8 +200,8 @@ class SteeringVectorEngine:
             "angular_drift_deg": angular_drift,
             "mrr": mrr,
             "precision_at_3": precision_at_3,
-            "dimension": self.image_embeddings.shape[1],
-            "total_indexed": len(self.image_paths),
+            "dimension": self.image_embeddings.shape[1] if self.image_embeddings is not None else 1152,
+            "total_indexed": total_photos,
             "is_bounded": True
         }
 
