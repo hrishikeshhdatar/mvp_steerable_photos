@@ -1,0 +1,13 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Local runtime data
+data/embeddings.pt
+session_log.jsonl
+.env
+.DS_Store
+
+# Ignore image binaries but keep directory structure
+data/images/*
+!data/images/.gitkeep
