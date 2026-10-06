@@ -10,15 +10,15 @@ st.set_page_config(
     page_title="Google Photos | Steerable Retrieval Prototype",
     page_icon="🖼️",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # -----------------------------------------------------------------------------
-# Google Photos Custom CSS Theme
+# Google Photos Custom Material CSS Theme (Main App + Sidebar)
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
-    /* Google Material Font & Background */
+    /* Google Material Font & Base Background */
     @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
     
     html, body, [class*="css"] {
@@ -26,14 +26,37 @@ st.markdown("""
     }
     
     .stApp {
-        background-color: #FFFFFF;
+        background-color: #FFFFFF !important;
+    }
+
+    /* Google Photos Sidebar Light Styling Override */
+    section[data-testid="stSidebar"] {
+        background-color: #F8F9FA !important;
+        border-right: 1px solid #E0E0E0 !important;
+    }
+
+    section[data-testid="stSidebar"] * {
+        color: #3C4043 !important;
+    }
+
+    section[data-testid="stSidebar"] h1, 
+    section[data-testid="stSidebar"] h2, 
+    section[data-testid="stSidebar"] h3 {
+        color: #202124 !important;
+        font-family: 'Google Sans', sans-serif !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #DADCE0 !important;
+        border-radius: 12px !important;
     }
 
     /* Google Photos Header styling */
     .gp-header {
         display: flex;
         align-items: center;
-        padding: 12px 0px;
+        padding: 4px 0px 16px 0px;
         border-bottom: 1px solid #E0E0E0;
         margin-bottom: 20px;
     }
@@ -99,7 +122,7 @@ st.markdown("""
         margin-bottom: 6px;
     }
 
-    /* Rounded Button Overrides */
+    /* Rounded Material Buttons */
     .stButton > button {
         border-radius: 20px !important;
         border: 1px solid #DADCE0 !important;
@@ -157,7 +180,7 @@ if "gamma" not in st.session_state:
     st.session_state.gamma = 0.2
 
 # -----------------------------------------------------------------------------
-# Sidebar: Strategy & Vector Tuning
+# Sidebar: Strategy & Vector Tuning (Light Material Theme)
 # -----------------------------------------------------------------------------
 with st.sidebar:
     st.title("⚙️ PM Strategy & Controls")
@@ -282,13 +305,11 @@ else:
             if os.path.exists(img_path):
                 st.image(img_path, use_container_width=True)
             
-            # Badge rendering
             if meta.get("has_exif"):
                 st.markdown(f"<span class='gp-badge-exif'>EXIF • {meta.get('year', 'Camera')}</span> <span style='font-size:11px; color:#70757A;'>Score: {score:.3f}</span>", unsafe_allow_html=True)
             else:
                 st.markdown(f"<span class='gp-badge-msg'>Messaging Media</span> <span style='font-size:11px; color:#70757A;'>Score: {score:.3f}</span>", unsafe_allow_html=True)
 
-            # Steering Controls
             b1, b2 = st.columns(2)
             is_pos = img_idx in st.session_state.pos_indices
             is_neg = img_idx in st.session_state.neg_indices
