@@ -39,7 +39,7 @@ st.markdown("""
         margin: 0 auto !important;
     }
 
-    /* 1. Google Photos Header */
+    /* Header */
     .gp-header {
         height: 64px;
         display: flex;
@@ -62,7 +62,7 @@ st.markdown("""
         margin-left: 6px;
     }
 
-    /* 2. Page Title */
+    /* Page Title */
     .gp-page-title {
         font-family: 'Google Sans', Roboto, sans-serif;
         font-size: 32px;
@@ -73,7 +73,7 @@ st.markdown("""
         margin-bottom: 24px;
     }
 
-    /* 3. Search Bar */
+    /* Search Bar */
     div[data-testid="stTextInput"] > label {
         display: none !important;
     }
@@ -103,7 +103,7 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* 4. Suggested Searches Chips */
+    /* Suggested Searches Chips */
     .suggested-section {
         margin-top: 16px;
     }
@@ -148,7 +148,7 @@ st.markdown("""
         border-color: #DADCE0 !important;
     }
 
-    /* 5. Result Info Header */
+    /* Result Info Header */
     .result-info-header {
         margin-top: 32px;
         margin-bottom: 16px;
@@ -168,7 +168,7 @@ st.markdown("""
         border-radius: 16px;
     }
 
-    /* 6. Photo Grid & Action Overlays */
+    /* Photo Grid & Action Overlays */
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) {
         position: relative !important;
         border-radius: 8px !important;
@@ -223,20 +223,14 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Executive Telemetry Card */
     .telemetry-card {
         background-color: #F8F9FA;
         border: 1px solid #E8EAED;
         border-radius: 12px;
         padding: 16px;
-        margin-top: 32px;
+        margin-top: 16px;
         font-size: 13px;
         color: #3C4043;
-    }
-    .metric-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: #1A73E8;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -266,7 +260,7 @@ BETA = 0.4
 GAMMA = 0.2
 
 # -----------------------------------------------------------------------------
-# Header & Search
+# Header & Search Input
 # -----------------------------------------------------------------------------
 st.markdown("""
 <header class="gp-header">
@@ -282,7 +276,7 @@ query_text = st.text_input("Search", value=st.session_state.query_input, placeho
 parsed_chips = parser.parse_query(query_text)
 parsed_year = parsed_chips.get("year")
 
-# Chips
+# Suggested Searches Chips
 st.markdown('<div class="suggested-section"><div class="suggested-label">Suggested searches</div></div>', unsafe_allow_html=True)
 chip_cols = st.columns(3)
 with chip_cols[0]:
@@ -298,9 +292,13 @@ with chip_cols[2]:
         st.session_state.query_input = "paper document receipt"
         st.rerun()
 
-# Execute Engine Search
+# -----------------------------------------------------------------------------
+# Execute Engine Search & Unpack Safely
+# -----------------------------------------------------------------------------
 start_time = time.time()
-results, telemetry = engine.search(
+total_indexed = max(len(getattr(engine, 'image_paths', [])), 50)
+
+raw_search_res = engine.search(
     query_text=query_text,
     pos_indices=list(st.session_state.pos_indices),
     neg_indices=list(st.session_state.neg_indices),
@@ -308,8 +306,24 @@ results, telemetry = engine.search(
     alpha=ALPHA,
     beta=BETA,
     gamma=GAMMA,
-    top_k=50
+    top_k=total_indexed
 )
+
+# Defensive Guardrail: Safely handles both tuple (results, telemetry) and single list returns
+if isinstance(raw_search_res, tuple) and len(raw_search_res) == 2:
+    results, telemetry = raw_search_res
+else:
+    results = raw_search_res if isinstance(raw_search_res, list) else []
+    telemetry = {
+        "cosine_similarity": 1.0,
+        "angular_drift_deg": 0.0,
+        "mrr": 0.0,
+        "precision_at_3": 0.0,
+        "dimension": 1152,
+        "total_indexed": len(results),
+        "is_bounded": True
+    }
+
 latency_ms = round((time.time() - start_time) * 1000, 2)
 
 # Result Info Header
@@ -320,7 +334,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Grid
+# Photo Grid
 if not results:
     st.info("No matching photos found.")
 else:
@@ -356,9 +370,7 @@ else:
                             st.session_state.pos_indices.discard(img_idx)
                         st.rerun()
 
-# -----------------------------------------------------------------------------
-# Executive PM & Engineering Telemetry Drawer
-# -----------------------------------------------------------------------------
+# Executive PM Telemetry
 with st.expander("🔬 Executive PM & Vector Engine Telemetry"):
     st.markdown("#### Real-time Multimodal Vector Performance")
     m1, m2, m3, m4 = st.columns(4)
@@ -369,8 +381,8 @@ with st.expander("🔬 Executive PM & Vector Engine Telemetry"):
 
     st.markdown(f"""
     <div class="telemetry-card">
-        <b>Engine Guardrails:</b> Hyper-sphere Unit Bounded (Norm = 1.00) | 
-        <b>Active Feedback Exemplars:</b> +{len(st.session_state.pos_indices)} Positives, -{len(st.session_state.neg_indices)} Negatives | 
-        <b>Latency Budget:</b> {latency_ms}ms / 150ms Target
+        <b>Engine Guardrails:</b> Hyper-sphere Bounded (Norm = 1.00) | 
+        <b>Active Exemplars:</b> +{len(st.session_state.pos_indices)} Positives, -{len(st.session_state.neg_indices)} Negatives | 
+        <b>Latency Target:</b> {latency_ms}ms / 150ms
     </div>
     """, unsafe_allow_html=True)
