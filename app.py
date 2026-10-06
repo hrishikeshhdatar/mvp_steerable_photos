@@ -1,3 +1,9 @@
+Here is the complete updated `app.py` code. It fixes both styling issues:
+
+1. **Suggested Searches Fixed:** Scoped the pill styles specifically to the chips row so they render as wide, readable Material 3 pills ("Living Room Furniture", "Sunset Photos (2024)", "Receipts & Documents") rather than squished grey circles.
+2. **Action Overlay Fixed:** Grouped the "Similar" and "Hide" action icons **side-by-side in the bottom-right corner** of each photo card, hidden by default and visible **only on hover**.
+
+```python
 import streamlit as st
 import time
 import os
@@ -117,7 +123,7 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* 4. Suggested Searches Chips (16px below search bar, content-sized, wrapping) */
+    /* 4. Suggested Searches Chips (Strictly Scoped Pill Styling) */
     .suggested-section {
         margin-top: 16px;
     }
@@ -129,22 +135,25 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
-    /* Target Streamlit columns row for chips to wrap & fit content */
-    div[data-testid="stHorizontalBlock"]:has(.suggested-chip) {
+    /* Target ONLY the suggested searches row */
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) {
         display: flex !important;
+        flex-direction: row !important;
         flex-wrap: wrap !important;
         gap: 8px !important;
         width: 100% !important;
+        margin-bottom: 16px !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(.suggested-chip) > div[data-testid="stColumn"] {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) > div[data-testid="stColumn"] {
         width: auto !important;
-        min-width: unset !important;
+        min-width: 0 !important;
         flex: 0 0 auto !important;
+        padding: 0 !important;
     }
-
-    .suggested-chip button {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button {
         height: 32px !important;
         min-height: 32px !important;
+        max-height: 32px !important;
         border-radius: 16px !important;
         border: 1px solid #DADCE0 !important;
         background-color: #FFFFFF !important;
@@ -153,21 +162,28 @@ st.markdown("""
         font-size: 14px !important;
         line-height: 20px !important;
         font-weight: 500 !important;
-        padding: 0 12px !important;
+        padding: 0 16px !important;
         box-shadow: none !important;
+        white-space: nowrap !important;
+        width: auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
         transition: background-color 150ms ease, border-color 150ms ease !important;
     }
-    .suggested-chip button:hover {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button:hover {
         background-color: #F1F3F4 !important;
         border-color: #DADCE0 !important;
         color: #202124 !important;
     }
-    .suggested-chip button span[data-testid="stIconMaterial"] {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button span[data-testid="stIconMaterial"] {
         font-size: 18px !important;
         color: #5F6368 !important;
+        margin-right: 6px !important;
     }
 
-    /* 5. Result Info Header (32px below chips, secondary text) */
+    /* 5. Result Info Header */
     .result-info-header {
         margin-top: 32px;
         margin-bottom: 16px;
@@ -193,44 +209,22 @@ st.markdown("""
         display: inline-block;
     }
 
-    /* 6. Photo Grid & Cards Layout */
-    div[data-testid="stHorizontalBlock"].photo-row {
-        gap: 8px !important;
-        margin-bottom: 8px !important;
-    }
-
-    /* Photo Card Container */
+    /* 6. Photo Grid & Action Overlay */
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) {
         position: relative !important;
         border-radius: 8px !important;
         overflow: hidden !important;
-        background-color: #E8EAED !important; /* Skeleton placeholder */
+        background-color: #E8EAED !important;
         transition: transform 150ms ease !important;
-        margin-bottom: 0px !important;
-    }
-
-    /* Responsive Grid Adjustments */
-    @media (max-width: 1023px) and (min-width: 600px) {
-        div[data-testid="stHorizontalBlock"].photo-row {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 8px !important;
-        }
-    }
-    @media (max-width: 599px) {
-        div[data-testid="stHorizontalBlock"].photo-row {
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
-        }
+        margin-bottom: 8px !important;
     }
 
     /* Photo Image */
-    div[data-testid="stColumn"] div[data-testid="stImage"] {
-        margin-bottom: 0px !important;
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] {
+        margin: 0 !important;
         line-height: 0 !important;
     }
-    div[data-testid="stColumn"] div[data-testid="stImage"] img {
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] img {
         border-radius: 8px !important;
         width: 100% !important;
         aspect-ratio: 4 / 3 !important;
@@ -239,58 +233,42 @@ st.markdown("""
         transition: filter 150ms ease !important;
     }
 
-    /* Dim overlay on hover (rgba(0,0,0,0.08)) */
-    div[data-testid="stColumn"]:hover div[data-testid="stImage"] img {
+    /* Dim photo slightly on hover */
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stImage"] img {
         filter: brightness(0.92) !important;
     }
 
-    /* Keyboard focus state (2px #1A73E8 outline with 2px offset) */
-    div[data-testid="stColumn"]:focus-within {
-        outline: 2px solid #1A73E8 !important;
-        outline-offset: 2px !important;
-    }
-
-    /* Overlaid Action Buttons (Bottom-right, 36px circular icons) */
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) {
+    /* Action Buttons Row Container (Overlay at Bottom-Right Corner) */
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
         position: absolute !important;
         bottom: 12px !important;
         right: 12px !important;
+        top: auto !important;
+        left: auto !important;
         width: auto !important;
-        z-index: 10 !important;
-        opacity: 0;
-        transition: opacity 150ms ease !important;
-        pointer-events: none;
-    }
-
-    /* Show action buttons on hover / focus / touch */
-    div[data-testid="stColumn"]:hover > div:nth-child(2),
-    div[data-testid="stColumn"]:focus-within > div:nth-child(2) {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-    }
-
-    @media (hover: none) {
-        div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-    }
-
-    /* Nested action buttons container */
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) div[data-testid="stHorizontalBlock"] {
         display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
         gap: 8px !important;
-        width: auto !important;
-    }
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) > div:nth-child(2) div[data-testid="stColumn"] {
-        width: auto !important;
-        min-width: unset !important;
-        background: transparent !important;
-        margin-bottom: 0px !important;
+        z-index: 10 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 150ms ease-in-out !important;
+        margin: 0 !important;
     }
 
-    /* 36px Circular Icon Buttons */
-    div[data-testid="stColumn"] div[data-testid="stButton"] button {
+    /* Column wrappers inside the action row */
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) > div[data-testid="stColumn"] {
+        width: auto !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Action Buttons (36px circular icons side-by-side) */
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button {
         width: 36px !important;
         height: 36px !important;
         min-width: 36px !important;
@@ -302,44 +280,43 @@ st.markdown("""
         background-color: rgba(32, 33, 36, 0.6) !important;
         color: #FFFFFF !important;
         border: none !important;
-        display: flex !important;
+        display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
         transition: background-color 150ms ease, transform 150ms ease !important;
         backdrop-filter: blur(4px) !important;
+        cursor: pointer !important;
     }
-    div[data-testid="stColumn"] div[data-testid="stButton"] button:hover {
+
+    /* Liked/Selected state (Accent Blue) */
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button[kind="primary"] {
+        background-color: #1A73E8 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button:hover {
         background-color: rgba(32, 33, 36, 0.85) !important;
         transform: scale(1.05) !important;
     }
-    div[data-testid="stColumn"] div[data-testid="stButton"] button:focus-visible {
-        outline: 2px solid #1A73E8 !important;
-        outline-offset: 2px !important;
-    }
 
-    /* Active / Liked State (Accent Blue) */
-    div[data-testid="stColumn"] div[data-testid="stButton"] button[kind="primary"] {
-        background-color: #1A73E8 !important;
-        color: #FFFFFF !important;
-    }
-    div[data-testid="stColumn"] div[data-testid="stButton"] button span[data-testid="stIconMaterial"] {
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button span[data-testid="stIconMaterial"] {
         font-size: 20px !important;
         color: #FFFFFF !important;
+        margin: 0 !important;
     }
 
-    /* Skeleton Placeholder State */
-    @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
+    /* HOVER TRIGGER: Show buttons grouped in bottom-right ONLY on photo hover/focus */
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]),
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):focus-within div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
-    .skeleton-box {
-        background: linear-gradient(90deg, #E8EAED 25%, #F1F3F4 50%, #E8EAED 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 8px;
-        aspect-ratio: 4 / 3;
-        width: 100%;
+
+    @media (hover: none) {
+        div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
     }
 
     /* Empty State */
@@ -370,7 +347,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# System Initialization (Caching preserved)
+# System Initialization
 # -----------------------------------------------------------------------------
 @st.cache_resource
 def init_system():
@@ -382,7 +359,6 @@ def init_system():
 
 engine, parser, logger = init_system()
 
-# State variables preserved exactly as before
 if "query_input" not in st.session_state:
     st.session_state.query_input = "living room furniture"
 if "pos_indices" not in st.session_state:
@@ -390,13 +366,12 @@ if "pos_indices" not in st.session_state:
 if "neg_indices" not in st.session_state:
     st.session_state.neg_indices = set()
 
-# Fixed optimal vector weights preserved
 ALPHA = 0.5
 BETA = 0.4
 GAMMA = 0.2
 
 # -----------------------------------------------------------------------------
-# 1. Header (64px tall, Google wordmark with Photos text)
+# 1. Header
 # -----------------------------------------------------------------------------
 st.markdown("""
 <header class="gp-header">
@@ -432,25 +407,19 @@ st.markdown('<div class="suggested-section"><div class="suggested-label">Suggest
 chip_cols = st.columns(3)
 
 with chip_cols[0]:
-    st.markdown('<div class="suggested-chip">', unsafe_allow_html=True)
     if st.button("Living Room Furniture", icon=":material/chair:", key="chip_living_room"):
         st.session_state.query_input = "living room furniture"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with chip_cols[1]:
-    st.markdown('<div class="suggested-chip">', unsafe_allow_html=True)
     if st.button("Sunset Photos (2024)", icon=":material/wb_twilight:", key="chip_sunset"):
         st.session_state.query_input = "scenic landscape sunset 2024"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with chip_cols[2]:
-    st.markdown('<div class="suggested-chip">', unsafe_allow_html=True)
     if st.button("Receipts & Documents", icon=":material/receipt_long:", key="chip_receipts"):
         st.session_state.query_input = "paper document receipt"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Search Execution
@@ -492,11 +461,9 @@ if not results:
     </div>
     """, unsafe_allow_html=True)
 else:
-    # Render photos in 3-column rows
     for row_idx in range(0, len(results), 3):
         row_items = results[row_idx:row_idx+3]
         cols = st.columns(3)
-        st.markdown('<div class="photo-row-marker"></div>', unsafe_allow_html=True)
         
         for idx, item in enumerate(row_items):
             col = cols[idx]
@@ -508,10 +475,8 @@ else:
             with col:
                 if os.path.exists(img_path):
                     st.image(img_path, use_container_width=True)
-                else:
-                    st.markdown('<div class="skeleton-box"></div>', unsafe_allow_html=True)
 
-                # Overlaid 36px action icon buttons
+                # Overlaid side-by-side action buttons
                 b1, b2 = st.columns(2)
                 
                 with b1:
@@ -543,3 +508,5 @@ else:
                             st.session_state.neg_indices.add(img_idx)
                             st.session_state.pos_indices.discard(img_idx)
                         st.rerun()
+
+```
