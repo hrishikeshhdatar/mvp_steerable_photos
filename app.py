@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# Google Photos Authentic Design System
+# Google Photos Authentic Material Design System
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
@@ -29,12 +29,12 @@ st.markdown("""
         background-color: #F0F4F9 !important;
     }
 
-    /* Hide Sidebar Completely for Clean Consumer UI */
+    /* Hide Developer Sidebar Completely */
     section[data-testid="stSidebar"] {
         display: none !important;
     }
 
-    /* Header */
+    /* Google Brand Header */
     .gp-brand-logo {
         font-size: 24px;
         font-weight: 500;
@@ -49,45 +49,62 @@ st.markdown("""
         font-weight: 700;
         color: #1F1F1F;
         letter-spacing: -0.8px;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
     }
 
-    /* Floating Pill Search Bar */
+    /* "Ask Photos..." Search Bar with Magnifying Glass */
     div[data-testid="stTextInput"] > div > div {
         background-color: #FFFFFF !important;
         border-radius: 100px !important;
         border: 1px solid #C4C7C5 !important;
         box-shadow: 0 4px 18px rgba(0,0,0,0.05) !important;
-        padding: 6px 20px !important;
+        padding: 6px 16px 6px 48px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2002124' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: 18px center !important;
+        transition: all 0.2s ease-in-out !important;
     }
+    
     div[data-testid="stTextInput"] > div > div:focus-within {
         border-color: #0B57D0 !important;
         box-shadow: 0 4px 24px rgba(11,87,208,0.18) !important;
     }
+
     div[data-testid="stTextInput"] input {
         color: #1F1F1F !important;
         font-size: 16px !important;
+        font-weight: 400 !important;
         background: transparent !important;
     }
+
     div[data-testid="stTextInput"] label {
         display: none !important;
+    }
+
+    /* Suggested Searches Chips Section */
+    .suggested-label {
+        font-size: 14px;
+        color: #444746;
+        font-weight: 500;
+        margin: 16px 0px 10px 0px;
     }
 
     /* Material Action Pill Buttons */
     .stButton > button {
         border-radius: 100px !important;
-        border: 1px solid #747775 !important;
+        border: 1px solid #C4C7C5 !important;
         background-color: #FFFFFF !important;
         color: #1F1F1F !important;
         font-weight: 500 !important;
         font-size: 13.5px !important;
         padding: 8px 20px !important;
         transition: all 0.2s ease !important;
-        box-shadow: none !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
     }
+
     .stButton > button:hover {
-        background-color: #0B57D0 !important;
-        color: #FFFFFF !important;
+        background-color: #E8F0FE !important;
+        color: #0B57D0 !important;
         border-color: #0B57D0 !important;
     }
 
@@ -130,7 +147,7 @@ BETA = 0.4
 GAMMA = 0.2
 
 # -----------------------------------------------------------------------------
-# Header
+# Google Photos Header
 # -----------------------------------------------------------------------------
 st.markdown("""
 <div class="gp-brand-logo">
@@ -141,14 +158,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Search Bar & Benchmark Scenarios
+# Google "Ask Photos..." Search Bar
 # -----------------------------------------------------------------------------
-query_text = st.text_input("Search", value=st.session_state.query_input, placeholder="🔍 Search photos...")
+query_text = st.text_input("Search", value=st.session_state.query_input, placeholder="Ask Photos...")
 
 parsed_chips = parser.parse_query(query_text)
 parsed_year = parsed_chips.get("year")
 
-st.markdown("<div style='font-size:13px; color:#444746; font-weight:500; margin: 12px 0 8px 0;'>Suggested Searches:</div>", unsafe_allow_html=True)
+# -----------------------------------------------------------------------------
+# Suggested Searches Section
+# -----------------------------------------------------------------------------
+st.markdown('<div class="suggested-label">Suggested searches</div>', unsafe_allow_html=True)
 
 p1, p2, p3 = st.columns(3)
 if p1.button("🛋️ Living Room Furniture", use_container_width=True):
