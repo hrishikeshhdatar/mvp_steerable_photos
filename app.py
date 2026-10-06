@@ -19,7 +19,7 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&display=swap');
 
-    /* Force Light Theme across System/Browser Dark Mode Settings */
+    /* Force Light Theme across Browser/System Dark Mode Settings */
     :root {
         color-scheme: light !important;
     }
@@ -31,7 +31,6 @@ st.markdown("""
         -webkit-font-smoothing: antialiased;
     }
 
-    /* Override dark container backgrounds */
     div[data-testid="stAppViewContainer"], div[data-testid="stVerticalBlock"] {
         background-color: #FFFFFF !important;
     }
@@ -113,7 +112,7 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* 4. Suggested Searches Chips */
+    /* 4. Suggested Searches Chips (Explicit All-State Styling) */
     .suggested-section {
         margin-top: 16px;
     }
@@ -140,26 +139,58 @@ st.markdown("""
         padding: 0 !important;
         background-color: transparent !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button {
+
+    button[key*="chip_"],
+    div[data-testid="stButton"]:has(button[key*="chip_"]) > button {
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #DADCE0 !important;
+        color: #202124 !important;
+        border-radius: 16px !important;
         height: 32px !important;
         min-height: 32px !important;
-        border-radius: 16px !important;
-        border: 1px solid #DADCE0 !important;
-        background-color: #FFFFFF !important;
-        color: #202124 !important;
+        max-height: 32px !important;
+        padding: 0 12px !important;
+        font-family: 'Google Sans Text', 'Google Sans', Roboto, sans-serif !important;
         font-size: 14px !important;
+        line-height: 20px !important;
         font-weight: 500 !important;
-        padding: 0 16px !important;
+        width: fit-content !important;
         box-shadow: none !important;
-        white-space: nowrap !important;
-        transition: background-color 150ms ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button:hover {
+
+    button[key*="chip_"]:hover,
+    div[data-testid="stButton"]:has(button[key*="chip_"]) > button:hover {
+        background: #F1F3F4 !important;
         background-color: #F1F3F4 !important;
         border-color: #DADCE0 !important;
+        color: #202124 !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button span[data-testid="stIconMaterial"] {
-        color: #5F6368 !important;
+
+    button[key*="chip_"]:active,
+    button[key*="chip_"][kind="primary"],
+    div[data-testid="stButton"]:has(button[key*="chip_"]) > button:active,
+    div[data-testid="stButton"]:has(button[key*="chip_"]) > button[kind="primary"] {
+        background: #E8F0FE !important;
+        background-color: #E8F0FE !important;
+        border-color: #1A73E8 !important;
+        color: #1A73E8 !important;
+    }
+
+    button[key*="chip_"]:focus-visible,
+    div[data-testid="stButton"]:has(button[key*="chip_"]) > button:focus-visible {
+        outline: 2px solid #1A73E8 !important;
+        outline-offset: 2px !important;
+    }
+
+    button[key*="chip_"] *,
+    div[data-testid="stButton"]:has(button[key*="chip_"]) > button * {
+        color: inherit !important;
     }
 
     /* 5. Result Info Header */
@@ -182,26 +213,27 @@ st.markdown("""
         border-radius: 16px;
     }
 
-    /* 6. Photo Grid & Containers (Fixes black background boxes and tightens gap) */
-    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stImage"]) {
-        gap: 8px !important;
-    }
-
+    /* 6. Photo Cards & Tight Gap Fix (Bug 2) */
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) {
-        position: relative !important;
         border-radius: 8px !important;
         overflow: hidden !important;
-        background-color: #F1F3F4 !important; /* Soft Light Grey Placeholder */
-        margin-bottom: 8px !important;
+        background-color: transparent !important;
+        margin-bottom: 16px !important;
         padding: 0 !important;
     }
 
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] {
-        margin: 0 !important;
-        padding: 0 !important;
+    /* Scope vertical gap inside photo cards to 8px (0.5rem) */
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stVerticalBlock"] {
+        gap: 0.5rem !important;
     }
 
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] img {
+    /* Remove default margin on image */
+    div[data-testid="stImage"] {
+        margin-bottom: 0 !important;
+    }
+
+    div[data-testid="stImage"] img {
+        margin-bottom: 0 !important;
         border-radius: 8px !important;
         width: 100% !important;
         aspect-ratio: 4 / 3 !important;
@@ -210,85 +242,85 @@ st.markdown("""
         transition: filter 150ms ease !important;
     }
 
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stImage"] img {
-        filter: brightness(0.95) !important;
+    div[data-testid="stImage"]:hover img {
+        filter: brightness(0.96) !important;
     }
 
-    /* Floating Action Overlay Container */
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
-        position: absolute !important;
-        bottom: 10px !important;
-        right: 10px !important;
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 6px !important;
-        z-index: 10 !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        transition: opacity 150ms ease-in-out !important;
-        background: transparent !important;
-    }
-
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) > div[data-testid="stColumn"] {
-        width: auto !important;
-        flex: 0 0 auto !important;
-        padding: 0 !important;
-        background: transparent !important;
-    }
-
-    /* 7. Action Icon Buttons (Floating Clean White Glass Style) */
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
+    /* 7. Action Buttons Under Photos (Similar / Hide - Bug 1 & 2) */
+    button[key*="pos_"],
+    button[key*="neg_"],
+    button[data-testid="stBaseButton-secondary"]:has(span),
+    div[data-testid="stButton"]:has(button[key*="pos_"]) > button,
+    div[data-testid="stButton"]:has(button[key*="neg_"]) > button {
+        background: #F1F3F4 !important;
+        background-color: #F1F3F4 !important;
+        border: none !important;
+        color: #5F6368 !important;
+        border-radius: 18px !important;
         min-height: 36px !important;
-        max-width: 36px !important;
-        max-height: 36px !important;
-        border-radius: 50% !important;
-        padding: 0 !important;
-        background-color: rgba(255, 255, 255, 0.92) !important;
-        border: 1px solid rgba(0, 0, 0, 0.08) !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-        backdrop-filter: blur(4px) !important;
+        height: 36px !important;
+        padding: 0 12px !important;
+        font-family: 'Google Sans Text', 'Google Sans', Roboto, sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        box-shadow: none !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer !important;
-        transition: all 150ms ease !important;
+        transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+        width: 100% !important;
     }
 
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button span[data-testid="stIconMaterial"] {
-        font-size: 20px !important;
-        color: #444746 !important;
-        margin: 0 !important;
+    button[key*="pos_"]:hover,
+    button[key*="neg_"]:hover,
+    div[data-testid="stButton"]:has(button[key*="pos_"]) > button:hover,
+    div[data-testid="stButton"]:has(button[key*="neg_"]) > button:hover {
+        background: #E8EAED !important;
+        background-color: #E8EAED !important;
+        color: #202124 !important;
     }
 
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button:hover {
-        background-color: #FFFFFF !important;
-        transform: scale(1.06) !important;
+    button[key*="pos_"]:active,
+    button[key*="neg_"]:active,
+    div[data-testid="stButton"]:has(button[key*="pos_"]) > button:active,
+    div[data-testid="stButton"]:has(button[key*="neg_"]) > button:active {
+        background: #DADCE0 !important;
+        background-color: #DADCE0 !important;
+        color: #202124 !important;
     }
 
-    /* Active Liked State (Material Blue) */
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button[kind="primary"] {
-        background-color: #1A73E8 !important;
-        border: none !important;
+    /* Active Liked / Hidden State */
+    button[key*="pos_"][kind="primary"],
+    button[key*="neg_"][kind="primary"],
+    div[data-testid="stButton"]:has(button[key*="pos_"]) > button[kind="primary"],
+    div[data-testid="stButton"]:has(button[key*="neg_"]) > button[kind="primary"] {
+        background: #E8F0FE !important;
+        background-color: #E8F0FE !important;
+        color: #1A73E8 !important;
+        border: 1px solid #1A73E8 !important;
     }
 
-    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button[kind="primary"] span[data-testid="stIconMaterial"] {
-        color: #FFFFFF !important;
+    button[key*="pos_"]:focus-visible,
+    button[key*="neg_"]:focus-visible,
+    div[data-testid="stButton"]:has(button[key*="pos_"]) > button:focus-visible,
+    div[data-testid="stButton"]:has(button[key*="neg_"]) > button:focus-visible {
+        outline: 2px solid #1A73E8 !important;
+        outline-offset: 2px !important;
     }
 
-    /* Reveal buttons on hover */
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]),
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):focus-within div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
-        opacity: 1 !important;
-        pointer-events: auto !important;
+    button[key*="pos_"] *,
+    button[key*="neg_"] * {
+        color: inherit !important;
     }
 
-    @media (hover: none) {
-        div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
-            opacity: 1 !important;
-            pointer-events: auto !important;
+    @media (max-width: 600px) {
+        button[key*="pos_"],
+        button[key*="neg_"],
+        div[data-testid="stButton"]:has(button[key*="pos_"]) > button,
+        div[data-testid="stButton"]:has(button[key*="neg_"]) > button {
+            min-height: 44px !important;
+            height: 44px !important;
         }
     }
 
@@ -404,7 +436,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Photo Grid & Action Overlay
+# Photo Grid & Action Row (Bug 2 Fix)
 # -----------------------------------------------------------------------------
 if not results:
     st.info("No matching photos found.")
@@ -423,9 +455,10 @@ else:
                 if os.path.exists(img_path):
                     st.image(img_path, use_container_width=True)
 
-                b1, b2 = st.columns(2)
+                # Place "Similar" and "Hide" side-by-side on the left with an 8px gap
+                b1, b2, _ = st.columns([1, 1, 2], gap="small")
                 with b1:
-                    if st.button("", icon=":material/thumb_up:", key=f"pos_{img_idx}", help="Show similar", type="primary" if is_pos else "secondary"):
+                    if st.button("Similar", icon=":material/thumb_up:", key=f"pos_{img_idx}", help="Show similar", type="primary" if is_pos else "secondary"):
                         if is_pos:
                             st.session_state.pos_indices.remove(img_idx)
                         else:
@@ -433,7 +466,7 @@ else:
                             st.session_state.neg_indices.discard(img_idx)
                         st.rerun()
                 with b2:
-                    if st.button("", icon=":material/visibility_off:", key=f"neg_{img_idx}", help="Hide photo", type="primary" if is_neg else "secondary"):
+                    if st.button("Hide", icon=":material/visibility_off:", key=f"neg_{img_idx}", help="Hide photo", type="primary" if is_neg else "secondary"):
                         if is_neg:
                             st.session_state.neg_indices.remove(img_idx)
                         else:
