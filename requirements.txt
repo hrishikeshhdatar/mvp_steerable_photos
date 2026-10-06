@@ -1,0 +1,8 @@
+torch
+torchvision
+transformers
+pillow
+numpy
+streamlit
+google-genai
+pydantic
