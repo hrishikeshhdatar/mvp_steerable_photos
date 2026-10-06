@@ -13,17 +13,27 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# Material Design 3 & Google Photos Design System CSS
+# Material Design 3 & Google Photos Light Theme CSS
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&display=swap');
+
+    /* Force Light Theme across System/Browser Dark Mode Settings */
+    :root {
+        color-scheme: light !important;
+    }
 
     html, body, [class*="stApp"], .stApp {
         background-color: #FFFFFF !important;
         color: #202124 !important;
         font-family: 'Google Sans Text', 'Google Sans', Roboto, sans-serif !important;
         -webkit-font-smoothing: antialiased;
+    }
+
+    /* Override dark container backgrounds */
+    div[data-testid="stAppViewContainer"], div[data-testid="stVerticalBlock"] {
+        background-color: #FFFFFF !important;
     }
 
     header[data-testid="stHeader"], footer, section[data-testid="stSidebar"] {
@@ -39,7 +49,7 @@ st.markdown("""
         margin: 0 auto !important;
     }
 
-    /* Header */
+    /* 1. Header */
     .gp-header {
         height: 64px;
         display: flex;
@@ -62,7 +72,7 @@ st.markdown("""
         margin-left: 6px;
     }
 
-    /* Page Title */
+    /* 2. Page Title */
     .gp-page-title {
         font-family: 'Google Sans', Roboto, sans-serif;
         font-size: 32px;
@@ -73,7 +83,7 @@ st.markdown("""
         margin-bottom: 24px;
     }
 
-    /* Search Bar */
+    /* 3. Search Bar */
     div[data-testid="stTextInput"] > label {
         display: none !important;
     }
@@ -103,7 +113,7 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* Suggested Searches Chips */
+    /* 4. Suggested Searches Chips */
     .suggested-section {
         margin-top: 16px;
     }
@@ -128,6 +138,7 @@ st.markdown("""
         min-width: 0 !important;
         flex: 0 0 auto !important;
         padding: 0 !important;
+        background-color: transparent !important;
     }
     div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button {
         height: 32px !important;
@@ -147,11 +158,14 @@ st.markdown("""
         background-color: #F1F3F4 !important;
         border-color: #DADCE0 !important;
     }
+    div[data-testid="stHorizontalBlock"]:has(button[key*="chip_"]) button span[data-testid="stIconMaterial"] {
+        color: #5F6368 !important;
+    }
 
-    /* Result Info Header */
+    /* 5. Result Info Header */
     .result-info-header {
-        margin-top: 32px;
-        margin-bottom: 16px;
+        margin-top: 24px;
+        margin-bottom: 12px;
         font-size: 12px;
         line-height: 16px;
         color: #5F6368;
@@ -168,61 +182,117 @@ st.markdown("""
         border-radius: 16px;
     }
 
-    /* Photo Grid & Action Overlays */
+    /* 6. Photo Grid & Containers (Fixes black background boxes and tightens gap) */
+    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stImage"]) {
+        gap: 8px !important;
+    }
+
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) {
         position: relative !important;
         border-radius: 8px !important;
         overflow: hidden !important;
-        background-color: #E8EAED !important;
+        background-color: #F1F3F4 !important; /* Soft Light Grey Placeholder */
         margin-bottom: 8px !important;
+        padding: 0 !important;
     }
+
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) div[data-testid="stImage"] img {
         border-radius: 8px !important;
         width: 100% !important;
         aspect-ratio: 4 / 3 !important;
         object-fit: cover !important;
+        display: block !important;
         transition: filter 150ms ease !important;
     }
+
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stImage"] img {
-        filter: brightness(0.92) !important;
+        filter: brightness(0.95) !important;
     }
 
+    /* Floating Action Overlay Container */
     div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
         position: absolute !important;
-        bottom: 12px !important;
-        right: 12px !important;
+        bottom: 10px !important;
+        right: 10px !important;
         display: flex !important;
         flex-direction: row !important;
-        gap: 8px !important;
+        gap: 6px !important;
         z-index: 10 !important;
         opacity: 0 !important;
         pointer-events: none !important;
         transition: opacity 150ms ease-in-out !important;
+        background: transparent !important;
     }
+
     div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) > div[data-testid="stColumn"] {
         width: auto !important;
         flex: 0 0 auto !important;
         padding: 0 !important;
+        background: transparent !important;
     }
+
+    /* 7. Action Icon Buttons (Floating Clean White Glass Style) */
     div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button {
         width: 36px !important;
         height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        max-width: 36px !important;
+        max-height: 36px !important;
         border-radius: 50% !important;
         padding: 0 !important;
-        background-color: rgba(32, 33, 36, 0.6) !important;
-        border: none !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+        background-color: rgba(255, 255, 255, 0.92) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
         backdrop-filter: blur(4px) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 150ms ease !important;
     }
+
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button span[data-testid="stIconMaterial"] {
+        font-size: 20px !important;
+        color: #444746 !important;
+        margin: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button:hover {
+        background-color: #FFFFFF !important;
+        transform: scale(1.06) !important;
+    }
+
+    /* Active Liked State (Material Blue) */
     div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button[kind="primary"] {
         background-color: #1A73E8 !important;
+        border: none !important;
     }
-    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
+
+    div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) button[kind="primary"] span[data-testid="stIconMaterial"] {
+        color: #FFFFFF !important;
+    }
+
+    /* Reveal buttons on hover */
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):hover div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]),
+    div[data-testid="stColumn"]:has(div[data-testid="stImage"]):focus-within div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
         opacity: 1 !important;
         pointer-events: auto !important;
     }
 
+    @media (hover: none) {
+        div[data-testid="stHorizontalBlock"]:has(button[key*="pos_"]) {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+    }
+
+    /* Telemetry Card Styling */
     .telemetry-card {
         background-color: #F8F9FA;
         border: 1px solid #E8EAED;
@@ -293,7 +363,7 @@ with chip_cols[2]:
         st.rerun()
 
 # -----------------------------------------------------------------------------
-# Execute Engine Search & Unpack Safely
+# Search Execution
 # -----------------------------------------------------------------------------
 start_time = time.time()
 total_indexed = max(len(getattr(engine, 'image_paths', [])), 50)
@@ -309,7 +379,6 @@ raw_search_res = engine.search(
     top_k=total_indexed
 )
 
-# Defensive Guardrail: Safely handles both tuple (results, telemetry) and single list returns
 if isinstance(raw_search_res, tuple) and len(raw_search_res) == 2:
     results, telemetry = raw_search_res
 else:
@@ -334,13 +403,15 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Photo Grid
+# -----------------------------------------------------------------------------
+# Photo Grid & Action Overlay
+# -----------------------------------------------------------------------------
 if not results:
     st.info("No matching photos found.")
 else:
     for row_idx in range(0, len(results), 3):
         row_items = results[row_idx:row_idx+3]
-        cols = st.columns(3)
+        cols = st.columns(3, gap="small")
         for idx, item in enumerate(row_items):
             col = cols[idx]
             img_idx = item["index"]
@@ -370,7 +441,9 @@ else:
                             st.session_state.pos_indices.discard(img_idx)
                         st.rerun()
 
-# Executive PM Telemetry
+# -----------------------------------------------------------------------------
+# Executive PM Telemetry Drawer
+# -----------------------------------------------------------------------------
 with st.expander("🔬 Executive PM & Vector Engine Telemetry"):
     st.markdown("#### Real-time Multimodal Vector Performance")
     m1, m2, m3, m4 = st.columns(4)
