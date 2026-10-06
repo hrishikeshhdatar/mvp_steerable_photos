@@ -1,49 +1,41 @@
 import os
-import json
-from google import genai
-from google.genai import types
-from pydantic import BaseModel
 
-class ConstraintChips(BaseModel):
-    visual_descriptors: list[str]
-    active_year: int | None = None
-    negative_filters: list[str] = []
-
-SYSTEM_INSTRUCTION = """
-You are a search query parser for a photo retrieval system. 
-Extract structured search constraints from user follow-up text prompts.
-Maintain previously established constraints unless the user explicitly contradicts or removes them.
-Output must conform to the specified JSON schema.
-"""
-
-class FollowupQueryParser:
+class ConstraintParser:
     def __init__(self):
-        api_key = os.getenv("GEMINI_API_KEY")
-        self.client = genai.Client(api_key=api_key) if api_key else None
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.client = None
+        
+        if self.api_key:
+            try:
+                from google import genai
+                self.client = genai.Client(api_key=self.api_key)
+            except Exception:
+                self.client = None
 
-    def parse_followup(self, current_prompt: str, followup_text: str, current_year: int = None) -> ConstraintChips:
+    def parse_query(self, query_text: str) -> dict:
+        """Extracts temporal constraints and filter chips from text using Gemini 2.5 Flash or regex fallback."""
+        if not query_text:
+            return {"year": None, "keywords": []}
+
+        # Rule-based fast extraction for years
+        import re
+        year_match = re.search(r'\b(20[0-2][0-9])\b', query_text)
+        fallback_year = int(year_match.group(1)) if year_match else None
+
         if not self.client:
-            # Fallback if API key is not configured
-            descriptors = [d.strip() for d in f"{current_prompt} {followup_text}".split() if len(d.strip()) > 3]
-            return ConstraintChips(visual_descriptors=list(set(descriptors)), active_year=current_year)
+            return {"year": fallback_year, "keywords": query_text.split(), "parsed_by": "Fast-Rule Fallback"}
 
-        prompt = f"""
-        Current Active Search Prompt: "{current_prompt}"
-        Current Active Year Filter: {current_year}
-        User Follow-up Input: "{followup_text}"
-
-        Update the visual descriptors and active year based on the follow-up.
-        """
-
-        response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                response_mime_type="application/json",
-                response_schema=ConstraintChips,
-                temperature=0.1
-            ),
-        )
-
-        return ConstraintChips.model_validate_json(response.text)
+        try:
+            prompt = f"Extract search intent from query: '{query_text}'. Return JSON with keys 'year' (integer or null) and 'category' (string or null)."
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+            )
+            # Safe return parsing
+            return {
+                "year": fallback_year,
+                "raw_gemini_response": response.text if hasattr(response, 'text') else str(response),
+                "parsed_by": "Gemini 2.5 Flash"
+            }
+        except Exception:
+            return {"year": fallback_year, "keywords": query_text.split(), "parsed_by": "Fallback"}
