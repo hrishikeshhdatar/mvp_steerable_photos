@@ -11,7 +11,7 @@ from PIL import Image
 # PAGE CONFIGURATION & GLOBAL LIGHT THEME ENFORCEMENT
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Google Photos Search Insights Engine & MVP Gallery",
+    page_title="Google Photos Search Insights Engine & Sandbox",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -35,7 +35,7 @@ st.components.v1.html("""
 </script>
 """, height=0, width=0)
 
-# Material Design 3 Injection + Image Grid Aspect Ratio Overrides
+# Material Design 3 Styling
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Roboto:wght@400;500;700&display=swap');
@@ -205,9 +205,7 @@ st.markdown("""
         margin-bottom: 24px !important;
     }
 
-    /* =========================================================
-       2. UNSELECTED TABS CONTRAST FIX (st.tabs)
-       ========================================================= */
+    /* Navigation Tabs */
     div[data-testid="stTabs"] {
         margin-bottom: 24px !important;
     }
@@ -260,7 +258,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       3. UNIFORM GALLERY IMAGE HEIGHT & CROP FIX (st.image)
+       UNIFORM GALLERY IMAGE HEIGHT & CROP FIX
        ========================================================= */
     div[data-testid="stImage"] {
         width: 100% !important;
@@ -269,7 +267,7 @@ st.markdown("""
 
     div[data-testid="stImage"] img {
         width: 100% !important;
-        height: 210px !important;
+        height: 200px !important;
         object-fit: cover !important;
         border-radius: 12px !important;
         border: 1px solid #DADCE0 !important;
@@ -281,8 +279,31 @@ st.markdown("""
     }
 
     /* =========================================================
-       4. NATIVE STREAMLIT BORDERED CONTAINERS AS CARDS
+       LIGHT GREY NEUTRAL BUTTONS (PREVIOUS VERSION)
        ========================================================= */
+    div[data-testid="stButton"] > button {
+        height: 32px !important;
+        min-height: 32px !important;
+        border-radius: 16px !important;
+        background-color: #F1F3F4 !important;
+        color: #3C4043 !important;
+        font-family: 'Google Sans Text', 'Roboto', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 0 16px !important;
+        border: 1px solid #DADCE0 !important;
+        box-shadow: none !important;
+        transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+        cursor: pointer !important;
+    }
+
+    div[data-testid="stButton"] > button:hover {
+        background-color: #E8F0FE !important;
+        color: #1A73E8 !important;
+        border-color: #AECBFA !important;
+    }
+
+    /* Container Cards */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #F8F9FA !important;
         border: 1px solid #DADCE0 !important;
@@ -292,9 +313,7 @@ st.markdown("""
         margin-bottom: 24px !important;
     }
 
-    /* =========================================================
-       5. DATAFRAME & TABLE VISIBILITY (st.dataframe)
-       ========================================================= */
+    /* Dataframe Tables */
     div[data-testid="stDataFrame"] {
         border: 1px solid #DADCE0 !important;
         border-radius: 8px !important;
@@ -302,9 +321,7 @@ st.markdown("""
         box-shadow: none !important;
     }
 
-    /* =========================================================
-       6. SELECTBOX DROPDOWNS (st.selectbox)
-       ========================================================= */
+    /* Selectboxes */
     div[data-baseweb="select"] {
         background-color: #FFFFFF !important;
         border-radius: 8px !important;
@@ -355,7 +372,7 @@ st.markdown("""
         color: #1A73E8 !important;
     }
 
-    /* Form Labels & Inputs */
+    /* Inputs */
     div[data-testid="stTextArea"] label, 
     div[data-testid="stTextInput"] label, 
     div[data-testid="stSelectbox"] label, 
@@ -379,28 +396,6 @@ st.markdown("""
         line-height: 16px !important;
         color: #5F6368 !important;
         margin-top: 4px !important;
-    }
-
-    /* Filled Pill Buttons */
-    div[data-testid="stButton"] > button {
-        height: 36px !important;
-        min-height: 36px !important;
-        border-radius: 18px !important;
-        background-color: #1A73E8 !important;
-        color: #FFFFFF !important;
-        font-family: 'Google Sans Text', 'Roboto', sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        padding: 0 16px !important;
-        border: none !important;
-        box-shadow: none !important;
-        transition: background-color 150ms ease, box-shadow 150ms ease !important;
-        cursor: pointer !important;
-    }
-
-    div[data-testid="stButton"] > button:hover {
-        background-color: #1765CC !important;
-        color: #FFFFFF !important;
     }
 
     /* Summary Card Output */
@@ -427,7 +422,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 1. SECURE API KEY & RESILIENT IMAGE INDEXING
+# 1. API KEY & RESILIENT IMAGE INDEXING
 # -----------------------------------------------------------------------------
 api_key = None
 try:
@@ -453,7 +448,6 @@ def init_system(image_dirs=None):
             for ext in extensions:
                 found_images.extend(glob.glob(os.path.join(folder, ext)))
                 
-    # Unique and sorted list of paths
     return sorted(list(set(found_images)))
 
 image_library = init_system()
@@ -648,9 +642,9 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# Navigation Tabs
+# Navigation Tabs (Clean text, no emojis)
 tab_gallery, tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📷 Photo Library Gallery",
+    "Photo Library Gallery",
     "AI Summary",
     "Priorities", 
     "Memory Patterns", 
@@ -659,7 +653,7 @@ tab_gallery, tab1, tab2, tab3, tab4, tab5 = st.tabs([
 ])
 
 # -----------------------------------------------------------------------------
-# TAB 0: PHOTO LIBRARY GALLERY (UNIFORM SIZING & ACTIONS)
+# TAB 0: PHOTO LIBRARY GALLERY
 # -----------------------------------------------------------------------------
 with tab_gallery:
     st.markdown("""
@@ -677,7 +671,7 @@ with tab_gallery:
         
         filtered_imgs = [img for img in image_library if filter_query.lower() in img.lower()] if filter_query else image_library
 
-        # Render 3-column uniform image grid
+        # Render 3-column uniform grid
         cols_per_row = 3
         for i in range(0, len(filtered_imgs), cols_per_row):
             cols = st.columns(cols_per_row)
@@ -687,15 +681,14 @@ with tab_gallery:
                     fname = os.path.basename(img_path)
                     
                     with cols[j]:
-                        # Uniform cropped rendering controlled by CSS `object-fit: cover`
                         st.image(img_path, use_column_width=True)
                         
-                        # Action Buttons Row
+                        # Action Buttons (Clean text: Similar / Hide)
                         btn_c1, btn_c2 = st.columns(2)
                         with btn_c1:
-                            st.button("👍 Similar", key=f"sim_{i+j}_{fname}")
+                            st.button("Similar", key=f"sim_{i+j}_{fname}")
                         with btn_c2:
-                            st.button("🙈 Hide", key=f"hide_{i+j}_{fname}")
+                            st.button("Hide", key=f"hide_{i+j}_{fname}")
 
 # -----------------------------------------------------------------------------
 # TAB 1: AI SUMMARY
