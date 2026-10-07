@@ -5,65 +5,42 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
-from PIL import Image
 
 # -----------------------------------------------------------------------------
-# PAGE CONFIGURATION & GLOBAL LIGHT THEME ENFORCEMENT
+# PAGE CONFIGURATION & MATERIAL DESIGN 3 CSS
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Google Photos Search Insights Engine & Sandbox",
+    page_title="Google Photos Search Insights Engine",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Force Streamlit frontend theme state to Light Mode via JavaScript
-st.components.v1.html("""
-<script>
-    const setLight = () => {
-        try {
-            const parentDoc = window.parent.document;
-            parentDoc.documentElement.setAttribute('data-theme', 'light');
-            parentDoc.body.setAttribute('data-theme', 'light');
-            window.parent.localStorage.setItem('stActiveTheme', '{"base":"light"}');
-        } catch (e) {
-            console.log("Theme initialized");
-        }
-    };
-    setLight();
-    setTimeout(setLight, 500);
-</script>
-""", height=0, width=0)
-
-# Material Design 3 Styling
+# Material Design 3 Design System Injection
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Roboto:wght@400;500;700&display=swap');
 
-    /* 1. FORCE STREAMLIT GLOBAL CSS VARIABLES TO LIGHT MODE */
-    :root, [data-testid="stAppViewContainer"], .stApp, [class*="stApp"], body {
+    /* Force Light Theme Globally */
+    :root, [data-theme="light"], [data-theme="dark"] {
         color-scheme: light !important;
-        --background-color: #FFFFFF !important;
-        --secondary-background-color: #F8F9FA !important;
-        --text-color: #202124 !important;
-        --primary-color: #1A73E8 !important;
     }
 
-    /* Hide Default Streamlit Chrome Header & Footer */
+    /* Hide Default Streamlit Chrome */
     header[data-testid="stHeader"], footer, #MainMenu {
         display: none !important;
         visibility: hidden !important;
     }
 
-    /* Canvas & Global App Background */
-    html, body, [data-testid="stAppViewContainer"], .stApp {
+    /* Canvas & Global Typography */
+    html, body, [class*="stApp"], .stApp {
         background-color: #FFFFFF !important;
         color: #202124 !important;
         font-family: 'Google Sans Text', 'Roboto', Arial, sans-serif !important;
         -webkit-font-smoothing: antialiased;
     }
 
-    /* Main Content Container Layout */
+    /* Main Container Max-Width & Spacing */
     .main .block-container {
         max-width: 1200px !important;
         padding-left: 32px !important;
@@ -164,7 +141,7 @@ st.markdown("""
         display: inline-block !important;
     }
 
-    /* Header & Section Typography */
+    /* Page & Section Headers */
     .md-header-title {
         font-family: 'Google Sans', sans-serif !important;
         font-size: 32px !important;
@@ -205,7 +182,7 @@ st.markdown("""
         margin-bottom: 24px !important;
     }
 
-    /* Navigation Tabs */
+    /* Tabs Styling */
     div[data-testid="stTabs"] {
         margin-bottom: 24px !important;
     }
@@ -229,7 +206,9 @@ st.markdown("""
         transition: background-color 150ms ease, color 150ms ease !important;
     }
 
-    button[data-baseweb="tab"] * {
+    button[data-baseweb="tab"] p,
+    button[data-baseweb="tab"] div,
+    button[data-baseweb="tab"] span {
         color: #3C4043 !important;
         font-weight: 500 !important;
         opacity: 1 !important;
@@ -239,68 +218,26 @@ st.markdown("""
         background-color: #F1F3F4 !important;
     }
 
-    button[data-baseweb="tab"]:hover * {
+    button[data-baseweb="tab"]:hover p,
+    button[data-baseweb="tab"]:hover div,
+    button[data-baseweb="tab"]:hover span {
         color: #1A73E8 !important;
     }
 
-    button[data-baseweb="tab"][aria-selected="true"] {
+    button[aria-selected="true"] {
         background-color: transparent !important;
         border-bottom: 3px solid #1A73E8 !important;
     }
 
-    button[data-baseweb="tab"][aria-selected="true"] * {
+    button[aria-selected="true"] p,
+    button[aria-selected="true"] div,
+    button[aria-selected="true"] span {
         color: #1A73E8 !important;
         font-weight: 600 !important;
     }
 
     div[data-baseweb="tab-highlight"] {
         background-color: #1A73E8 !important;
-    }
-
-    /* =========================================================
-       UNIFORM GALLERY IMAGE HEIGHT & CROP FIX
-       ========================================================= */
-    div[data-testid="stImage"] {
-        width: 100% !important;
-        margin-bottom: 8px !important;
-    }
-
-    div[data-testid="stImage"] img {
-        width: 100% !important;
-        height: 200px !important;
-        object-fit: cover !important;
-        border-radius: 12px !important;
-        border: 1px solid #DADCE0 !important;
-        transition: transform 200ms ease, box-shadow 200ms ease !important;
-    }
-
-    div[data-testid="stImage"] img:hover {
-        box-shadow: 0px 4px 12px rgba(60, 64, 67, 0.15) !important;
-    }
-
-    /* =========================================================
-       LIGHT GREY NEUTRAL BUTTONS (PREVIOUS VERSION)
-       ========================================================= */
-    div[data-testid="stButton"] > button {
-        height: 32px !important;
-        min-height: 32px !important;
-        border-radius: 16px !important;
-        background-color: #F1F3F4 !important;
-        color: #3C4043 !important;
-        font-family: 'Google Sans Text', 'Roboto', sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        padding: 0 16px !important;
-        border: 1px solid #DADCE0 !important;
-        box-shadow: none !important;
-        transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
-        cursor: pointer !important;
-    }
-
-    div[data-testid="stButton"] > button:hover {
-        background-color: #E8F0FE !important;
-        color: #1A73E8 !important;
-        border-color: #AECBFA !important;
     }
 
     /* Container Cards */
@@ -313,6 +250,32 @@ st.markdown("""
         margin-bottom: 24px !important;
     }
 
+    /* Buttons */
+    div[data-testid="stButton"] > button {
+        height: 36px !important;
+        min-height: 36px !important;
+        border-radius: 18px !important;
+        background-color: #1A73E8 !important;
+        color: #FFFFFF !important;
+        font-family: 'Google Sans Text', 'Roboto', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 0 24px !important;
+        border: none !important;
+        box-shadow: none !important;
+        transition: background-color 150ms ease, box-shadow 150ms ease !important;
+        cursor: pointer !important;
+    }
+
+    div[data-testid="stButton"] > button:hover {
+        background-color: #1765CC !important;
+        color: #FFFFFF !important;
+    }
+
+    div[data-testid="stButton"] > button:active {
+        background-color: #1557B0 !important;
+    }
+
     /* Dataframe Tables */
     div[data-testid="stDataFrame"] {
         border: 1px solid #DADCE0 !important;
@@ -321,7 +284,33 @@ st.markdown("""
         box-shadow: none !important;
     }
 
-    /* Selectboxes */
+    /* Inputs */
+    div[data-testid="stTextArea"] label, 
+    div[data-testid="stTextInput"] label, 
+    div[data-testid="stSelectbox"] label, 
+    div[data-testid="stSlider"] label {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #202124 !important;
+        margin-bottom: 8px !important;
+    }
+
+    div[data-testid="stTextArea"] textarea,
+    div[data-testid="stTextInput"] input {
+        background-color: #FFFFFF !important;
+        color: #202124 !important;
+        border: 1px solid #DADCE0 !important;
+        border-radius: 8px !important;
+    }
+
+    .input-helper-text {
+        font-size: 12px !important;
+        line-height: 16px !important;
+        color: #5F6368 !important;
+        margin-top: 4px !important;
+    }
+
+    /* Selectbox Dropdowns */
     div[data-baseweb="select"] {
         background-color: #FFFFFF !important;
         border-radius: 8px !important;
@@ -372,32 +361,6 @@ st.markdown("""
         color: #1A73E8 !important;
     }
 
-    /* Inputs */
-    div[data-testid="stTextArea"] label, 
-    div[data-testid="stTextInput"] label, 
-    div[data-testid="stSelectbox"] label, 
-    div[data-testid="stSlider"] label {
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        color: #202124 !important;
-        margin-bottom: 8px !important;
-    }
-
-    div[data-testid="stTextArea"] textarea,
-    div[data-testid="stTextInput"] input {
-        background-color: #FFFFFF !important;
-        color: #202124 !important;
-        border: 1px solid #DADCE0 !important;
-        border-radius: 8px !important;
-    }
-
-    .input-helper-text {
-        font-size: 12px !important;
-        line-height: 16px !important;
-        color: #5F6368 !important;
-        margin-top: 4px !important;
-    }
-
     /* Summary Card Output */
     .summary-output-card {
         background-color: #FFFFFF !important;
@@ -422,7 +385,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 1. API KEY & RESILIENT IMAGE INDEXING
+# 1. API KEY DETECTION
 # -----------------------------------------------------------------------------
 api_key = None
 try:
@@ -433,24 +396,6 @@ except Exception:
 
 if not api_key:
     api_key = os.environ.get("GEMINI_API_KEY", "")
-
-@st.cache_data(show_spinner=False)
-def init_system(image_dirs=None):
-    """Fast, memory-safe photo library indexer."""
-    if image_dirs is None:
-        image_dirs = [os.path.join("data", "images"), "images", "."]
-        
-    found_images = []
-    extensions = ('*.jpg', '*.jpeg', '*.png', '*.webp', '*.JPG', '*.JPEG', '*.PNG')
-    
-    for folder in image_dirs:
-        if os.path.exists(folder):
-            for ext in extensions:
-                found_images.extend(glob.glob(os.path.join(folder, ext)))
-                
-    return sorted(list(set(found_images)))
-
-image_library = init_system()
 
 # -----------------------------------------------------------------------------
 # 2. DATA INGESTION & HEURISTIC ENGINE
@@ -502,7 +447,7 @@ def load_and_analyze_corpus():
     master_df['full_text'] = (title_s + " " + content_s).str.strip()
     master_df = master_df[master_df['full_text'].str.len() > 10].drop_duplicates(subset=['full_text'])
 
-    # Taxonomy Tagging
+    # Taxonomy Classification
     retrieval_kw = r"search|find|cant find|can't find|missing|lost|where|date|location|album|ocr|text|gemini|scroll|remember|face|people"
     master_df['is_retrieval_issue'] = master_df['full_text'].str.contains(retrieval_kw, case=False, na=False)
 
@@ -613,8 +558,8 @@ def render_horizontal_bar_chart(series_data, x_label="Mentions", height=320):
 # -----------------------------------------------------------------------------
 st.markdown("""
 <div style="margin-bottom: 24px;">
-    <div class="md-header-title">Google Photos Search Insights Engine & Sandbox</div>
-    <div class="md-header-subtitle">Analyzing photo retrieval friction, user memory decay, and steerable photo search</div>
+    <div class="md-header-title">Google Photos Search Insights Engine</div>
+    <div class="md-header-subtitle">Analyzing photo retrieval friction and memory decay across public complaint logs</div>
     <div class="md-header-divider"></div>
 </div>
 """, unsafe_allow_html=True)
@@ -633,8 +578,8 @@ with st.sidebar:
         </div>
         <div class="sb-divider"></div>
         <div class="sb-metric-row">
-            <div class="sb-metric-label">Indexed Library Photos</div>
-            <div class="sb-metric-value">{len(image_library):,}</div>
+            <div class="sb-metric-label">Search Complaints Tagged</div>
+            <div class="sb-metric-value">{len(retrieval_df):,}</div>
         </div>
         <div class="sb-divider"></div>
         <div class="sb-label">AI Status</div>
@@ -642,9 +587,8 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# Navigation Tabs (Clean text, no emojis)
-tab_gallery, tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "Photo Library Gallery",
+# Navigation Tabs
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "AI Summary",
     "Priorities", 
     "Memory Patterns", 
@@ -653,45 +597,7 @@ tab_gallery, tab1, tab2, tab3, tab4, tab5 = st.tabs([
 ])
 
 # -----------------------------------------------------------------------------
-# TAB 0: PHOTO LIBRARY GALLERY
-# -----------------------------------------------------------------------------
-with tab_gallery:
-    st.markdown("""
-    <div>
-        <div class="md-section-title">MVP Photo Library Grid</div>
-        <div class="md-section-caption">Explore all indexed sandbox target and distractor photos in a clean, uniform grid.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if not image_library:
-        st.info("No images found in `data/images/`. Please verify target and distractor photos are uploaded to GitHub.")
-    else:
-        with st.container(border=True):
-            filter_query = st.text_input("Filter library by keyword:", placeholder="e.g. sunset, baby, desk, lamp")
-        
-        filtered_imgs = [img for img in image_library if filter_query.lower() in img.lower()] if filter_query else image_library
-
-        # Render 3-column uniform grid
-        cols_per_row = 3
-        for i in range(0, len(filtered_imgs), cols_per_row):
-            cols = st.columns(cols_per_row)
-            for j in range(cols_per_row):
-                if i + j < len(filtered_imgs):
-                    img_path = filtered_imgs[i + j]
-                    fname = os.path.basename(img_path)
-                    
-                    with cols[j]:
-                        st.image(img_path, use_column_width=True)
-                        
-                        # Action Buttons (Clean text: Similar / Hide)
-                        btn_c1, btn_c2 = st.columns(2)
-                        with btn_c1:
-                            st.button("Similar", key=f"sim_{i+j}_{fname}")
-                        with btn_c2:
-                            st.button("Hide", key=f"hide_{i+j}_{fname}")
-
-# -----------------------------------------------------------------------------
-# TAB 1: AI SUMMARY
+# TAB 1: AI SUMMARY (GEMINI AI SYNTHESIZER)
 # -----------------------------------------------------------------------------
 with tab1:
     st.markdown("""
