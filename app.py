@@ -213,7 +213,7 @@ st.markdown("""
         border-radius: 16px;
     }
 
-    /* 6. Photo Cards & Tight Gap Fix (Bug 2) */
+    /* 6. Photo Cards & Tight Gap Fix */
     div[data-testid="stColumn"]:has(div[data-testid="stImage"]) {
         border-radius: 8px !important;
         overflow: hidden !important;
@@ -227,9 +227,10 @@ st.markdown("""
         gap: 0.5rem !important;
     }
 
-    /* Remove default margin on image */
+    /* Force image container to fill column width */
     div[data-testid="stImage"] {
         margin-bottom: 0 !important;
+        width: 100% !important;
     }
 
     div[data-testid="stImage"] img {
@@ -246,7 +247,7 @@ st.markdown("""
         filter: brightness(0.96) !important;
     }
 
-    /* 7. Action Buttons Under Photos (Similar / Hide - Bug 1 & 2) */
+    /* 7. Action Buttons Under Photos (Similar / Hide) */
     button[key*="pos_"],
     button[key*="neg_"],
     button[data-testid="stBaseButton-secondary"]:has(span),
@@ -436,7 +437,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Photo Grid & Action Row (Bug 2 Fix)
+# Photo Grid & Action Row
 # -----------------------------------------------------------------------------
 if not results:
     st.info("No matching photos found.")
