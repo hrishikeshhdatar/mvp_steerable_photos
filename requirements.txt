@@ -1,8 +1,11 @@
 streamlit
+pandas
+plotly
+pillow
+google-generativeai
+google-genai
 torch
 torchvision
 transformers
 sentencepiece
 protobuf
-pillow
-google-genai
