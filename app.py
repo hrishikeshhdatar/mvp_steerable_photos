@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import os
+from PIL import Image, ImageOps
 from engine import SteeringVectorEngine
 from parser import ConstraintParser
 from logger import EventLogger
@@ -227,7 +228,8 @@ st.markdown("""
         gap: 0.5rem !important;
     }
 
-    /* Force image container, internal picture wrapper, and img element to fill column width */
+    /* Force image container, element wrapper, picture, and img element to fill column width */
+    div[data-testid="stElementContainer"]:has(div[data-testid="stImage"]),
     div[data-testid="stImage"],
     div[data-testid="stImage"] > picture,
     div[data-testid="stImage"] picture,
@@ -342,8 +344,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# System Initialization
+# System Initialization & Image Standardization Helper
 # -----------------------------------------------------------------------------
+@st.cache_data
+def load_and_standardize_image(img_path, target_size=(800, 600)):
+    if not img_path or not os.path.exists(img_path):
+        return None
+    try:
+        with Image.open(img_path) as img:
+            img = img.convert("RGB")
+            return ImageOps.fit(img, target_size, Image.Resampling.LANCZOS)
+    except Exception:
+        return None
+
 @st.cache_resource
 def init_system():
     engine = SteeringVectorEngine()
@@ -456,7 +469,10 @@ else:
             is_neg = img_idx in st.session_state.neg_indices
 
             with col:
-                if os.path.exists(img_path):
+                display_img = load_and_standardize_image(img_path)
+                if display_img is not None:
+                    st.image(display_img, use_container_width=True)
+                elif os.path.exists(img_path):
                     st.image(img_path, use_container_width=True)
 
                 # Place "Similar" and "Hide" side-by-side on the left with an 8px gap
