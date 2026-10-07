@@ -227,19 +227,22 @@ st.markdown("""
         gap: 0.5rem !important;
     }
 
-    /* Force image container to fill column width */
-    div[data-testid="stImage"] {
+    /* Force image container, internal picture wrapper, and img element to fill column width */
+    div[data-testid="stImage"],
+    div[data-testid="stImage"] > picture,
+    div[data-testid="stImage"] picture,
+    div[data-testid="stImage"] img {
         margin-bottom: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        display: block !important;
     }
 
     div[data-testid="stImage"] img {
-        margin-bottom: 0 !important;
         border-radius: 8px !important;
-        width: 100% !important;
         aspect-ratio: 4 / 3 !important;
         object-fit: cover !important;
-        display: block !important;
         transition: filter 150ms ease !important;
     }
 
